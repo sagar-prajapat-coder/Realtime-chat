@@ -8,6 +8,7 @@ class Lang {
         UPDATE_SUCCESS: "Updated successfully!",
         DELETE_SUCCESS: "User deleted successfully!",
         LOGOUT_SUCCESS: "Logout successful!",
+        MESSAGE_SEND: "Message send successful!",
       };
     
       static ERROR = {
