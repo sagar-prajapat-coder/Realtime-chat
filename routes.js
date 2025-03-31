@@ -11,6 +11,7 @@ router.post("/login",AuthServices.login);
 router.use(authMiddleware);
 router.post("/send",MessageServices.send);
 router.get("/conversation/:userId",MessageServices.conversations);
+router.get("/chat-list",MessageServices.chatList);
 
 
 export default router; 
