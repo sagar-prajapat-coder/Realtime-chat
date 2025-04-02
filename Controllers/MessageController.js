@@ -84,5 +84,43 @@ export const MessageServices = {
             console.error("Error fetching user list:", error);
             resp.status(500).json({ message: "Error fetching user list", error });
         }
+    },
+
+    blockUnblock: async (req, resp) => {
+        try {
+            const { user_id, isblock } = req.body;
+    
+            // Validate input
+            if (!user_id || isblock === undefined) {
+                return resp.status(400).json({ message: "User ID and block status are required" });
+            }
+    
+            // Find user
+            const user = await User.findById(user_id);
+            if (!user) {
+                return resp.status(404).json({ message: "User not found" });
+            }
+    
+            // Update block status
+            user.isblock = isblock;
+            await user.save();
+
+            const checkblockstatus  =   isblock == 1 ? 'Block' : 'Unblock';
+            
+            return resp.status(200).json({
+                message: `User ${checkblockstatus}`,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    isblock: user.isblock,
+                }
+            });
+    
+        } catch (error) {
+            console.error("Error updating block/unblock status:", error);
+            resp.status(500).json({ message: "Error updating block/unblock status", error });
+        }
     }
+    
 };

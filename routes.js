@@ -12,6 +12,7 @@ router.use(authMiddleware);
 router.post("/send",MessageServices.send);
 router.get("/conversation/:userId",MessageServices.conversations);
 router.get("/chat-list",MessageServices.chatList);
+router.post('/block-unblock',MessageServices.blockUnblock);
 
 
 export default router; 
