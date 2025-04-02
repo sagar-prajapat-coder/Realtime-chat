@@ -2,6 +2,7 @@ import Message from "../Model/Message.js";
 import Lang from "../Lang/en.js";
 import ResponseBuilder from "../Response/ResponseBuilder.js";
 import User from "../Model/User.js";
+import BlockUser from "../Model/BlockUser.js";
 import { sendMessageToUser } from "../index.js";  // 🟢 Import `io` from index.js
 
 
@@ -88,39 +89,48 @@ export const MessageServices = {
 
     blockUnblock: async (req, resp) => {
         try {
-            const { user_id, isblock } = req.body;
+            const { blockerId, blockedId, status } = req.body;
     
             // Validate input
-            if (!user_id || isblock === undefined) {
-                return resp.status(400).json({ message: "User ID and block status are required" });
+            if (!blockerId || !blockedId || status === undefined) {
+                return resp.status(400).json({ message: "Blocker ID, Blocked ID, and status are required" });
             }
     
-            // Find user
-            const user = await User.findById(user_id);
-            if (!user) {
-                return resp.status(404).json({ message: "User not found" });
+            // Check if users exist
+            const blocker = await User.findById(blockerId);
+            const blockedUser = await User.findById(blockedId);
+            if (!blocker || !blockedUser) {
+                return resp.status(404).json({ message: "One or both users not found" });
             }
+      
+            // Check if already exists
+            let blockEntry = await BlockUser.findOne({ blockerId, blockedId });
     
-            // Update block status
-            user.isblock = isblock;
-            await user.save();
-
-            const checkblockstatus  =   isblock == 1 ? 'Block' : 'Unblock';
-            
-            return resp.status(200).json({
-                message: `User ${checkblockstatus}`,
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    isblock: user.isblock,
+            if (status === 1) {
+                // Block User
+                if (!blockEntry) {
+                    blockEntry = new BlockUser({ blockerId, blockedId, status });
+                } else {
+                    blockEntry.status = 1; // Update to blocked
                 }
-            });
+                await blockEntry.save();
     
+                return resp.status(200).json({ message: "User blocked successfully", blockEntry });
+            } else {
+                // Unblock User
+                if (blockEntry) {
+                    blockEntry.status = 0;
+                    await blockEntry.save();
+    
+                    return resp.status(200).json({ message: "User unblocked successfully" });
+                } else {
+                    return resp.status(400).json({ message: "User is not blocked" });
+                }
+            }
         } catch (error) {
-            console.error("Error updating block/unblock status:", error);
-            resp.status(500).json({ message: "Error updating block/unblock status", error });
+            console.error("Error in block/unblock:", error);
+            resp.status(500).json({ message: "Error in block/unblock", error });
         }
     }
     
-};
+};  
