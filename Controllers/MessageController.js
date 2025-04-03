@@ -19,6 +19,13 @@ export const MessageServices = {
             return resp.status(404).json({ message: "Receiver not found" });
             }
 
+            // Check if the sender is blocked by the receiver
+        const isBlocked = await BlockUser.findOne({ blockerId: receiverId, blockedId: req.user.id, status: 1 });
+
+        if (isBlocked) {
+            return resp.status(403).json({ message: `${receiver.name} blocked you` });
+        }
+
             const newMessage = new Message({
             sender: req.user.id,
             receiver: receiverId,
