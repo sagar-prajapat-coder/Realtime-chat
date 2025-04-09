@@ -65,5 +65,20 @@ export const AuthServices = {
             console.error("Error login user:", error);
             return resp.status(500).json({ error: "Internal Server Error" });
         }
-    }
-};
+    },
+
+    logout: async(req, resp) => {
+        try {
+          const token = req.headers.authorization?.split(" ")[1];
+          if (!token) return resp.status(400).json({ message: "No token provided" });
+
+          // Set token expiration time to 1 hour
+          await client.set(token, "blacklisted", { EX: 3600 });
+
+          return resp.status(200).json({ message: "Logged out successfully" });
+      } catch (error) {
+          return resp.status(500).json({ message: "Logout failed", error });
+      }
+  }
+  
+};   
