@@ -18,6 +18,7 @@ const fileFilter = (req, file, cb) => {
     cb(null, true);
   } else {
     cb(new Error("Only JPEG, PNG, JPG images and MP4 videos are allowed"), false);
+    
   }
 };
 
